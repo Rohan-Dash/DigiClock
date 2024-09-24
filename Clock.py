@@ -16,29 +16,35 @@ center_x = 250
 center_y = 250
 clock_radius = 200
 
-# Gradient background function
-def create_gradient(canvas, start_color, end_color):
-    for i in range(500):
-        color = "#%02x%02x%02x" % (int(start_color[0] + (end_color[0] - start_color[0]) * i / 500),
-                                   int(start_color[1] + (end_color[1] - start_color[1]) * i / 500),
-                                   int(start_color[2] + (end_color[2] - start_color[2]) * i / 500))
-        canvas.create_line(0, i, 500, i, fill=color)
+# Function to create a radial gradient background
+def create_radial_gradient(canvas, center, radius, color1, color2):
+    for i in range(radius):
+        ratio = i / radius
+        r = int(color1[0] * (1 - ratio) + color2[0] * ratio)
+        g = int(color1[1] * (1 - ratio) + color2[1] * ratio)
+        b = int(color1[2] * (1 - ratio) + color2[2] * ratio)
+        color = f'#{r:02x}{g:02x}{b:02x}'
+        canvas.create_oval(center_x - i, center_y - i, center_x + i, center_y + i, outline=color, width=2)
 
-# Function to draw the clock face
+# Function to draw the clock face with numbers
 def draw_clock_face():
-    # Draw the gradient background
-    create_gradient(canvas, (30, 30, 30), (70, 70, 70))  # Dark to lighter gradient
+    # Create a modern radial gradient background (from dark to light)
+    create_radial_gradient(canvas, (center_x, center_y), clock_radius, (20, 20, 40), (80, 80, 120))  # Dark blue to lighter
     
-    # Draw the outer circle for the clock face
+    # Draw outer circle for the clock
     canvas.create_oval(center_x - clock_radius, center_y - clock_radius,
                        center_x + clock_radius, center_y + clock_radius, outline="white", width=8)
 
-    # Draw hour markers as minimalistic dots
-    for hour in range(12):
+    # Draw hour markers with numbers
+    for hour in range(1, 13):
         angle = math.radians(hour * 30)
-        x_outer = center_x + clock_radius * math.sin(angle)
-        y_outer = center_y - clock_radius * math.cos(angle)
-        canvas.create_oval(x_outer - 5, y_outer - 5, x_outer + 5, y_outer + 5, fill="white")
+        x_outer = center_x + (clock_radius - 30) * math.sin(angle)
+        y_outer = center_y - (clock_radius - 30) * math.cos(angle)
+        
+        # Place the hour numbers (1-12)
+        x_number = center_x + (clock_radius - 50) * math.sin(angle)
+        y_number = center_y - (clock_radius - 50) * math.cos(angle)
+        canvas.create_text(x_number, y_number, text=str(hour), font=("Helvetica", 16, "bold"), fill="white")
 
 # Function to update the clock hands
 def update_clock():

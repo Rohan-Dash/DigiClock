@@ -2,13 +2,13 @@ import tkinter as tk
 import time
 import math
 
-# Create the main window
+# Create the main window (windowless, borderless)
 root = tk.Tk()
-root.title("Modern Analog Clock")
 root.geometry("500x500")
-root.resizable(0, 0)
+root.overrideredirect(True)  # Removes the window border and title bar
+root.wm_attributes("-transparentcolor", "black")  # Makes black background transparent
 
-canvas = tk.Canvas(root, width=500, height=500)
+canvas = tk.Canvas(root, width=500, height=500, bg="black", highlightthickness=0)
 canvas.pack()
 
 # Center and radius of the clock
@@ -16,32 +16,34 @@ center_x = 250
 center_y = 250
 clock_radius = 200
 
-# Function to create a radial gradient background
-def create_radial_gradient(canvas, center, radius, color1, color2):
-    for i in range(radius):
-        ratio = i / radius
-        r = int(color1[0] * (1 - ratio) + color2[0] * ratio)
-        g = int(color1[1] * (1 - ratio) + color2[1] * ratio)
-        b = int(color1[2] * (1 - ratio) + color2[2] * ratio)
-        color = f'#{r:02x}{g:02x}{b:02x}'
-        canvas.create_oval(center_x - i, center_y - i, center_x + i, center_y + i, outline=color, width=2)
+# Variables to track the position of the window for dragging
+start_x = 0
+start_y = 0
+
+# Function to allow the window to be dragged
+def start_move(event):
+    global start_x, start_y
+    start_x = event.x
+    start_y = event.y
+
+def do_move(event):
+    x = root.winfo_x() + event.x - start_x
+    y = root.winfo_y() + event.y - start_y
+    root.geometry(f"+{x}+{y}")
+
+# Bind the functions to mouse events for dragging
+canvas.bind("<Button-1>", start_move)
+canvas.bind("<B1-Motion>", do_move)
 
 # Function to draw the clock face with numbers
 def draw_clock_face():
-    # Create a modern radial gradient background (from dark to light)
-    create_radial_gradient(canvas, (center_x, center_y), clock_radius, (20, 20, 40), (80, 80, 120))  # Dark blue to lighter
-    
-    # Draw outer circle for the clock
+    # Draw outer circle for the clock (remove outer frame for pure visibility of the clock)
     canvas.create_oval(center_x - clock_radius, center_y - clock_radius,
                        center_x + clock_radius, center_y + clock_radius, outline="white", width=8)
 
     # Draw hour markers with numbers
     for hour in range(1, 13):
         angle = math.radians(hour * 30)
-        x_outer = center_x + (clock_radius - 30) * math.sin(angle)
-        y_outer = center_y - (clock_radius - 30) * math.cos(angle)
-        
-        # Place the hour numbers (1-12)
         x_number = center_x + (clock_radius - 50) * math.sin(angle)
         y_number = center_y - (clock_radius - 50) * math.cos(angle)
         canvas.create_text(x_number, y_number, text=str(hour), font=("Helvetica", 16, "bold"), fill="white")

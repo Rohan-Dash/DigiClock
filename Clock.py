@@ -23,13 +23,17 @@ start_y = 0
 # Function to allow the window to be dragged
 def start_move(event):
     global start_x, start_y
-    start_x = event.x
-    start_y = event.y
+    start_x = event.x_root
+    start_y = event.y_root
 
 def do_move(event):
-    x = root.winfo_x() + event.x - start_x
-    y = root.winfo_y() + event.y - start_y
+    delta_x = event.x_root - start_x
+    delta_y = event.y_root - start_y
+    x = root.winfo_x() + delta_x
+    y = root.winfo_y() + delta_y
     root.geometry(f"+{x}+{y}")
+    start_x = event.x_root
+    start_y = event.y_root
 
 # Bind the functions to mouse events for dragging
 canvas.bind("<Button-1>", start_move)
@@ -37,7 +41,7 @@ canvas.bind("<B1-Motion>", do_move)
 
 # Function to draw the clock face with numbers
 def draw_clock_face():
-    # Draw outer circle for the clock (remove outer frame for pure visibility of the clock)
+    # Draw outer circle for the clock
     canvas.create_oval(center_x - clock_radius, center_y - clock_radius,
                        center_x + clock_radius, center_y + clock_radius, outline="white", width=8)
 
